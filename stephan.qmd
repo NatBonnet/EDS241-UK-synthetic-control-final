@@ -1,0 +1,12 @@
+---
+title: "StephanSection"
+author: "Stephan Kadonoff"
+format: html
+editor: visual
+---
+
+## Stephan's Section 
+
+#### MSPE Ratio Plot
+
+#### Balance Table
