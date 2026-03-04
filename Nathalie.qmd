@@ -1,0 +1,474 @@
+---
+title: "Nathalie"
+format: html
+---
+
+## The Study
+This analysis aimed to reproduce the results from Lépissier, Alice & Mildenberger, Matto. (2021). Unilateral climate policies can substantially reduce national carbon pollution. Climatic Change. 166. 10.1007/s10584-021-03111-2. The authors employed a synthetic control method (SCM) to estimate the causal effect of the UK’s 2001 Climate Change Programme (CCP) on the country’s carbon emissions. Their findings demonstrate that CCP reduced the UK's carbon emissions. CO2 emissions per capita were 9.8% lower in 2005 relative to what they would have been if the CCP had not been passed, demonstrating that unilateral climate policies can still reduce carbon emissions even in the absence of a binding global climate agreement.
+
+The 2001 UK CCP is a complex reform that included a carbon tax on large-scale energy users, industry-negotiated exemptions from the tax for meeting reduction targets, and a voluntary emissions trading scheme. It was one of the first comprehensive climate reform packages passed globally, in advance of action by most other Organisation for Economic Co-operation and Development (OECD) countries. Importantly, there is a limitation to evaluating the post-policy enactment effect, as the EU emissions trading system (EU ETS) was enacted in 2005.
+
+This positions the UK's CCP to be evaluated against a wide pool of donor countries by pre-treatment carbon emissions. The study compares 
+
+## Data
+
+-   data: all countries
+
+-   data_OECD: similar economic conditions
+
+-   data_OECD_HIC: + high income countries
+
+-   data_OECD_HIC_UMC: + upper middle countries
+
+# Load libraries
+```{r}
+#| output: false
+library(tidysynth) # for synthetic control
+library(tidyverse)
+library(patchwork) # for combining plots
+library(here)
+```
+
+## Source function to import .Rdata files from environment
+```{r}
+source(here("R", "load_rdata_files.R"))
+
+load_rdata_files()
+```
+
+## Declare the Synthetic Control - FIRST TRY (#1)
+```{r}
+# data_OECD
+scm_data_OECD <- data_OECD %>%
+  synthetic_control(
+    outcome = `EN.ATM.CO2E.PC`, 
+    unit = country,
+    time = year,
+    i_unit = "United Kingdom",
+    i_time = 2001,
+    generate_placebos = TRUE) %>%
+  
+  generate_predictor(  # Predictors (pre-treatment averages)
+    time_window = 1980:2001,
+    mean.preT = mean(mean.preT, na.rm = TRUE)) %>%
+  
+  generate_weights(
+    optimization_window = 1980:2001,
+    margin_ipop = 0.02,
+    sigf_ipop = 7,
+    bound_ipop = 6) %>%
+  generate_control() # Generate synthetic control
+
+
+# data_OECD_HIC
+scm_data_OECD_HIC <- data_OECD_HIC %>%
+  synthetic_control(
+    outcome = `EN.ATM.CO2E.PC`, 
+    unit = country,
+    time = year,
+    i_unit = "United Kingdom",
+    i_time = 2001,
+    generate_placebos = TRUE) %>%
+  
+  generate_predictor(  # Predictors (pre-treatment averages)
+    time_window = 1980:2001,
+    mean.preT = mean(mean.preT, na.rm = TRUE)) %>%
+  
+  generate_weights(
+    optimization_window = 1980:2001,
+    margin_ipop = 0.02,
+    sigf_ipop = 7,
+    bound_ipop = 6) %>%
+  generate_control() # Generate synthetic control
+
+
+
+# data_OECD_HIC_UMC
+scm_data_OECD_HIC_UMC <- data_OECD_HIC %>%
+  synthetic_control(
+    outcome = `EN.ATM.CO2E.PC`, 
+    unit = country,
+    time = year,
+    i_unit = "United Kingdom",
+    i_time = 2001,
+    generate_placebos = TRUE) %>%
+  
+  generate_predictor(  # Predictors (pre-treatment averages)
+    time_window = 1980:2001,
+    mean.preT = mean(mean.preT, na.rm = TRUE)) %>%
+  
+  generate_weights(
+    optimization_window = 1980:2001,
+    margin_ipop = 0.02,
+    sigf_ipop = 7,
+    bound_ipop = 6) %>%
+  generate_control() # Generate synthetic control
+
+
+```
+
+## Plot Trends #1
+
+```{r}
+# data_OECD
+p1_data_OECD <- scm_data_OECD %>%
+  plot_trends() +
+  labs(title = "UK vs Synthetic UK",
+       y = "CO2 per capita (power sector)",
+       x = "Year")
+
+p1_data_OECD
+
+# data_OECD_HIC
+p1_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_trends() +
+  labs(title = "UK vs Synthetic UK",
+       y = "CO2 per capita (power sector)",
+       x = "Year")
+
+p1_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+p1_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_trends() +
+  labs(title = "UK vs Synthetic UK",
+       y = "CO2 per capita (power sector)",
+       x = "Year")
+
+p1_data_OECD_HIC_UMC 
+```
+
+## TRY #2 
+
+```{r}
+# data_OECD
+scm_data_OECD <- data_OECD %>%
+  synthetic_control(
+    outcome = EN.ATM.CO2E.PC,
+    unit = country,
+    time = year,
+    i_unit = "United Kingdom",
+    i_time = 2001,
+    generate_placebos = TRUE) %>%
+  generate_predictor(time_window = 1980, EN.ATM.CO2E.PC_1980 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1981, EN.ATM.CO2E.PC_1981 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1982, EN.ATM.CO2E.PC_1982 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1983, EN.ATM.CO2E.PC_1983 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1984, EN.ATM.CO2E.PC_1984 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1985, EN.ATM.CO2E.PC_1985 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1986, EN.ATM.CO2E.PC_1986 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1987, EN.ATM.CO2E.PC_1987 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1988, EN.ATM.CO2E.PC_1988 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1989, EN.ATM.CO2E.PC_1989 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1990, EN.ATM.CO2E.PC_1990 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1991, EN.ATM.CO2E.PC_1991 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1992, EN.ATM.CO2E.PC_1992 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1993, EN.ATM.CO2E.PC_1993 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1994, EN.ATM.CO2E.PC_1994 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1995, EN.ATM.CO2E.PC_1995 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1996, EN.ATM.CO2E.PC_1996 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1997, EN.ATM.CO2E.PC_1997 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1998, EN.ATM.CO2E.PC_1998 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1999, EN.ATM.CO2E.PC_1999 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 2000, EN.ATM.CO2E.PC_2000 = mean(EN.ATM.CO2E.PC)) %>%
+  
+  generate_weights(optimization_window = 1980:2001) %>%
+  generate_control()
+
+# data_OECD_HIC
+scm_data_OECD_HIC <- data_OECD_HIC %>%
+  synthetic_control(
+    outcome = EN.ATM.CO2E.PC,
+    unit = country,
+    time = year,
+    i_unit = "United Kingdom",
+    i_time = 2001,
+    generate_placebos = TRUE) %>%
+  generate_predictor(time_window = 1980, EN.ATM.CO2E.PC_1980 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1981, EN.ATM.CO2E.PC_1981 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1982, EN.ATM.CO2E.PC_1982 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1983, EN.ATM.CO2E.PC_1983 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1984, EN.ATM.CO2E.PC_1984 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1985, EN.ATM.CO2E.PC_1985 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1986, EN.ATM.CO2E.PC_1986 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1987, EN.ATM.CO2E.PC_1987 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1988, EN.ATM.CO2E.PC_1988 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1989, EN.ATM.CO2E.PC_1989 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1990, EN.ATM.CO2E.PC_1990 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1991, EN.ATM.CO2E.PC_1991 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1992, EN.ATM.CO2E.PC_1992 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1993, EN.ATM.CO2E.PC_1993 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1994, EN.ATM.CO2E.PC_1994 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1995, EN.ATM.CO2E.PC_1995 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1996, EN.ATM.CO2E.PC_1996 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1997, EN.ATM.CO2E.PC_1997 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1998, EN.ATM.CO2E.PC_1998 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1999, EN.ATM.CO2E.PC_1999 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 2000, EN.ATM.CO2E.PC_2000 = mean(EN.ATM.CO2E.PC)) %>%
+  
+  generate_weights(optimization_window = 1980:2001) %>%
+  generate_control()
+
+# data_OECD_HIC_UMC
+scm_data_OECD_HIC_UMC <- data_OECD_HIC_UMC %>%
+  synthetic_control(
+    outcome = EN.ATM.CO2E.PC,
+    unit = country,
+    time = year,
+    i_unit = "United Kingdom",
+    i_time = 2001,
+    generate_placebos = TRUE) %>%
+  generate_predictor(time_window = 1980, EN.ATM.CO2E.PC_1980 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1981, EN.ATM.CO2E.PC_1981 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1982, EN.ATM.CO2E.PC_1982 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1983, EN.ATM.CO2E.PC_1983 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1984, EN.ATM.CO2E.PC_1984 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1985, EN.ATM.CO2E.PC_1985 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1986, EN.ATM.CO2E.PC_1986 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1987, EN.ATM.CO2E.PC_1987 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1988, EN.ATM.CO2E.PC_1988 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1989, EN.ATM.CO2E.PC_1989 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1990, EN.ATM.CO2E.PC_1990 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1991, EN.ATM.CO2E.PC_1991 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1992, EN.ATM.CO2E.PC_1992 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1993, EN.ATM.CO2E.PC_1993 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1994, EN.ATM.CO2E.PC_1994 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1995, EN.ATM.CO2E.PC_1995 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1996, EN.ATM.CO2E.PC_1996 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1997, EN.ATM.CO2E.PC_1997 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1998, EN.ATM.CO2E.PC_1998 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 1999, EN.ATM.CO2E.PC_1999 = mean(EN.ATM.CO2E.PC)) %>%
+  generate_predictor(time_window = 2000, EN.ATM.CO2E.PC_2000 = mean(EN.ATM.CO2E.PC)) %>%
+  
+  generate_weights(optimization_window = 1980:2001) %>%
+  generate_control()
+
+```
+
+
+```{r}
+scm_data_OECD %>%
+  grab_unit_weights() %>%
+  arrange(desc(weight))
+
+scm_data_OECD_HIC %>% 
+    grab_unit_weights() %>%
+  arrange(desc(weight))
+
+scm_data_OECD_HIC_UMC %>% 
+    grab_unit_weights() %>%
+  arrange(desc(weight)) %>% 
+filter(weight > 0.01)
+```
+```{r}
+scm_data_OECD %>% 
+    plot_weights()
+
+scm_data_OECD_HIC %>% 
+    plot_weights()
+    
+scm_data_OECD_HIC_UMC %>% 
+    plot_weights()
+```
+
+## Plot Trends #2 
+
+```{r}
+# data_OECD
+p1_data_OECD <- scm_data_OECD %>%
+  plot_trends() +
+  labs(title = "UK vs Synthetic UK",
+       y = "CO2 per capita (power sector)",
+       x = "Year")
+
+p1_data_OECD
+
+# data_OECD_HIC
+p1_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_trends() +
+  labs(title = "UK vs Synthetic UK",
+       y = "CO2 per capita (power sector)",
+       x = "Year")
+
+p1_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+p1_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_trends() +
+  labs(title = "UK vs Synthetic UK",
+       y = "CO2 per capita (power sector)",
+       x = "Year")
+
+p1_data_OECD_HIC_UMC 
+```
+
+## Plot Gaps (Treatment Effect)
+```{r}
+scm_data_OECD_HIC_UMC %>%
+  filter(.id == "United Kingdom", .placebo == 0) %>%
+  pull(.synthetic_control) %>%
+  .[[1]] %>% 
+  mutate(gap = real_y - synth_y) %>%
+  filter(time_unit >= 2001)
+```
+
+
+```{r}
+# data_OECD
+p2_data_OECD <- scm_data_OECD %>%
+  plot_differences() +
+  labs(title = "Gap: Observed - Synthetic")
+
+p2_data_OECD
+
+# data_OECD_HIC
+p2_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_differences() +
+  labs(title = "Gap: Observed - Synthetic")
+
+p2_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+p2_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_differences() +
+  labs(title = "Gap: Observed - Synthetic")
+
+p2_data_OECD_HIC_UMC 
+
+```
+
+## Placebo Tests
+
+```{r}
+# data_OECD
+p3_data_OECD <- scm_data_OECD %>%
+  plot_placebos() +
+  labs(title = "Placebo Tests")
+
+p3_data_OECD
+
+# data_OECD_HIC
+p3_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_placebos() +
+  labs(title = "Placebo Tests")
+
+p3_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+p3_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_placebos() +
+  labs(title = "Placebo Tests")
+
+p3_data_OECD_HIC_UMC
+
+```
+
+## MSPE Ratio Plot
+```{r}
+scm_data_OECD %>%
+  grab_significance() %>%  
+  filter(unit_name == "United Kingdom")
+
+scm_data_OECD_HIC %>%
+  grab_significance() %>%  
+  filter(unit_name == "United Kingdom")
+
+scm_data_OECD_HIC_UMC %>%
+  grab_significance() 
+
+  filter(unit_name == "United Kingdom")
+```
+```{r}
+scm_data_OECD_HIC_UMC %>%
+  grab_significance() %>%
+  filter(pre_mspe < 5 * min(pre_mspe[type == "Treated"])) %>%
+  arrange(desc(mspe_ratio))
+```
+
+
+
+```{r}
+# data_OECD
+p4_data_OECD <- scm_data_OECD %>%
+  plot_mspe_ratio() +
+  labs(title = "MSPE Ratio (Permutation Inference)")
+
+p4_data_OECD 
+
+# data_OECD_HIC
+p4_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_mspe_ratio() +
+  labs(title = "MSPE Ratio (Permutation Inference)")
+
+p4_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+p4_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_mspe_ratio() +
+  labs(title = "MSPE Ratio (Permutation Inference)")
+
+p4_data_OECD_HIC_UMC 
+
+```
+
+## Balance Table
+
+```{r}
+# data_OECD
+balance_data_OECD <- scm_data_OECD %>%
+  grab_balance_table()
+
+balance_data_OECD
+
+# data_OECD_HIC
+balance_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  grab_balance_table()
+
+balance_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+balance_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  grab_balance_table()
+
+balance_data_OECD_HIC_UMC
+```
+
+# Finding difference in means with pre-treatment values- this is our main result
+```{r}
+scm_data_OECD_HIC_UMC %>%
+    # Extract values from balance table
+    grab_balance_table() %>%
+    # Get differences between actual UK and synthetic and compare to donor differences
+    mutate(
+        synth_diff = `United Kingdom` - `synthetic_United Kingdom`,
+        donor_diff = `United Kingdom` - donor_sample,
+        year = as.integer(str_extract(variable, "\\d{4}"))
+    ) %>%
+    # Make into a tidy data format
+    pivot_longer(
+        cols = c(synth_diff, donor_diff),
+        names_to = "type",
+        values_to = "diff"
+    ) %>%
+    # Recode values to match those in paper result
+    mutate(type = recode(type, "synth_diff" = "Synthetic control", "donor_diff" = "Unweighted sample")) %>%
+    # Plot
+    ggplot(aes(x = diff, y = factor(year), color = type)) +
+    geom_point(size = 3) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    # Match colors used by paper figure
+    scale_color_manual(values = c(
+        "Synthetic control" = "#E07B6A",
+        "Unweighted sample" = "#5BBCD6"
+    )) +
+    labs(
+        x = "Difference in means with pre-treatment values in the UK",
+        y = "Year",
+        # Take out legend title the lazy way
+        color = "",
+        title = "Balance in weighted synthetic control and in unweighted sample"
+    ) +
+    # Get all the lines out
+    theme_classic()
+```
+
