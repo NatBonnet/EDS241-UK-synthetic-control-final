@@ -19,6 +19,7 @@
 /*.Rcheck/
 
 # RStudio files
+.RProj 
 .Rproj.user/
 
 # produced vignettes
@@ -37,6 +38,7 @@ vignettes/*.pdf
 *.knit.md
 
 # R Environment Variables
+
 .Renviron
 
 # pkgdown site
