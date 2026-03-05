@@ -1,0 +1,163 @@
+---
+title: "megan"
+format: html
+---
+
+Draft intro:
+
+## Case Study: Unilateral climate policies can substantially reduce national carbon pollution (2020)
+
+### Alice Le ́ pissier & Matto Mildenberger
+
+To reduce carbon emissions, the United Kingdom (UK) enacted the Climate Change Programme (CCP) in 2001. The CCP is a complex initiative with carbon taxes, industry-negotiated exemptions, and voluntary emission training program. This study uses the UK's CCP to evaluate if unilateral action can reduce carbon emissions.
+
+### The Fundamental Problem & the SMC Fix
+
+In 2001, the UK enacted the Climate Change Programme. Therefore, there is nothing that shows what *would* have happened in the UK without the CCP after 2001.
+
+To fix this problem and create a credible counterfactual, we will use the synthetic control method to manufacture a synthetic UK. The synthetic UK is the combination of weighted averages of counties that did not receive the policy intervention. To create the *perfect* synthetic UK, we will choose weights that match the UK pre-treatment emissions trends for every year and the covariates (income and population).
+
+### Donor Pool Criteria
+
+The donor pool most exclude countries with similar carbon pricing policies during the measurement period. Additionally, the donor pool must be similar to the UK's population (greater than 250,000) and economic status (OECD member or upper middle/high income).
+
+### Seeing the Treatment Effect
+
+For the SCM, the synthetic UK must match the real UK trends in order to properly understand what *would* have happened without the CCP. In other words, the pre-treatment fit must be good for credible casual inference. The gap between the synthetic and real UK after policy intervention is observed as the treatment effect.
+
+Before the 2001 policy: Real UK $\approx$ Synthetic UK.
+
+After the 2001 policy: The gap between Real UK and Synthetic UK = *Treatment effect.*
+
+## Research Question
+
+**Did United Kingdom's Climate Change Programme (CCP) (launched in 2001) reduce per capita CO₂ emissions?**
+
+-   $Y$ (outcome): Per capita CO₂ emissions (`EN.ATM.CO2E.PC`)
+
+-   Treated unit: United Kingdom (`UK`)
+
+-   Treatment year: 2001
+
+-   Donor pool: Other 51 countries with...
+
+    -   \(1\) in OECD or classified by the World Bank as upper middle–income or high-income countries at the time of treatment in 2001
+
+    -   \(2\) Population greater than 250,000,
+
+    -   \(3\) No carbon pricing policy
+
+**How do different donor pools impact the SMC results and robest checks?**
+
+-   In this study, we investigate and run SCM for 3 different donor pools:
+
+    -   \(1\) Countries with similar economic conditions to UK.
+
+    -   \(2\) High income counties with similar economic conditions to UK.
+
+    -   \(3\) High and upper-middle income counties with similar economic conditions to UK.
+
+## Data
+
+| Data Name | Includes |
+|----|----|
+| `data` | All countries. |
+| `data_OECD` | Countries with similar economic conditions to UK. |
+| `data_OECD_HIC` | High income counties with similar economic conditions to UK. |
+| `data_OECD_HIC_UMC` | High and upper-middle income counties with similar economic conditions to UK. |
+
+## Placebo Tests
+
+**Purpose of the Placebo Tests**
+
+The placebo tests assess whether the estimated effect is statistically meaningful by running the SCM for each control unit and plotting their gaps. The real control unit should appear extreme compared to the placebos gaps if the treatment effect is genuine. If there is signifiance, the control units should not exhibit similar effects as the treated unit.
+
+In this scenario: If the United Kingdom’s post-treatment gap is distinctive from the other placebo units, this suggests that the estimated treatment effect reflects a true impact rather than random variation and noise.
+
+**Interpreting the plots**
+
+-   *Pink lines:* The treated unit's (UK) actual gap. The actual UK's CO2 per capita - synthetic UK's CO2 per capita.
+
+-   *Grey lines:* The placebo gaps for each control country
+
+-   Good *pre-treatment fit* can be noted by all the pre-treatment lines centering around zero.
+
+-   *Treatment effect* is displayed by a divergence in the treated unit's post-treatment gap.
+
+**Discussion**
+
+All plots show good pre-treatment fit as the UK and control pre-treatment trends track close to zero. After the intervention, the UK trend dips sharply comparatively to the grey lines, demonstrating a reduction in emissions. The unusual UK's negative gap is evidence for genuine treatment effect, meaning the post-2001 drop in UK emissions is not expected by chance.
+
+The three plots show sensitivity to different donor pool specifications. UK's gap and treatment effect is evident in the placebo test using a donor pool with countries in the OECD (`data_OECD`). However, in the plot where the donor pool has OECD, high income, and upper middle class counties (`data_OECD_HIC_UMC`), UK is partial outlier with some grey lines matching UK's gap. Lastly, in the donor pool with OECD and high income counties (`data_OECD_HIC`), the UK no longer looks like a clear outlier. Here the placebo gaps post-2001 are just as large and/or larger than the UK's. Thus, the treatment effect is less statistically credible under this specification, and most credible in the the OECD-only pool.
+
+```{r}
+# data_OECD
+p3_data_OECD <- scm_data_OECD %>%
+  plot_placebos() +
+  labs(title = "data_OECD Placebo Tests")
+
+p3_data_OECD
+
+# data_OECD_HIC
+p3_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_placebos() +
+  labs(title = "data_OECD_HIC Placebo Tests")
+
+p3_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+p3_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_placebos() +
+  labs(title = "data_OECD_HIC_UMC Placebo Tests")
+
+p3_data_OECD_HIC_UMC
+
+```
+
+## MSPE Ratio Plot
+
+**Purpose and Meaning of MSPE Ratio**
+
+The Mean Squared Prediction Error (MSPE)ratio compares post-treatment signal to the pre-treatment error which explains the observed outcome of a unit and its synthetic control (UK and synthetic UK), before and after treatment.
+
+$$
+\text{MSPE Ratio} = \frac{MSPE_{post}}{MSPE_{pre}}
+$$
+
+A MSPE ratio of 1 means the intervention did nothing.
+
+A large MSPE ratio means the divergence of treatment gap is unlikely due to chance. Breaking a higher MSPE ratio down further, a smaller denominator means less pre-treatment error, suggesting better synthetic control. And a large numerator means the post-treatment gap is greater than the pre-treatment gap, indicating stronger treatment effect. All to say, a higher MSPE ratio notes that something genuinely changed with the intervention.
+
+**Discussion**
+
+When looking at the MSPE plot, it is important to see how the treatment group does in comparison to the other counties by dividing the UK's rank by the total number of countries, which is called the permutation p-value.
+
+In the first plot with **`data_OECD`**, there is possible evidence for significance policy intervention as the UK ranks 2 of 23 counties (p = 0.0869).
+
+In the second MSPE plot with a donor pool with counties in the OECD and with HIC (`data_OECD_HIC`), the UK ranks 6th of 33 countries (p= 0.1818). The countries ranking higher than the UK, including Singapore, Belgium, and Italy, have a post-treatment gap that deviates from their pre-period fit. Therefore, the UK's post intervention divergence is not usual and not significant.
+
+Lastly, the strickest donor pool in the OECD with high and middle income counties (`data_OECD_HIC_UMC`) exhibits the UK ranking 3rd behind Oman, and Trinidad & Tobago (p = 0.0577).
+
+```{r}
+# data_OECD
+p4_data_OECD <- scm_data_OECD %>%
+  plot_mspe_ratio() +
+  labs(title = "data_OECD MSPE Ratio (Permutation Inference)")
+
+p4_data_OECD 
+
+# data_OECD_HIC
+p4_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_mspe_ratio() +
+  labs(title = "data_OECD_HIC MSPE Ratio (Permutation Inference)")
+
+p4_data_OECD_HIC
+
+# data_OECD_HIC_UMC
+p4_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_mspe_ratio() +
+  labs(title = "data_OECD_HIC_UMC MSPE Ratio (Permutation Inference)")
+
+p4_data_OECD_HIC_UMC 
+
+```
