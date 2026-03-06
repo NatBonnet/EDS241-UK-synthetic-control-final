@@ -60,11 +60,73 @@ After the 2001 policy: The gap between Real UK and Synthetic UK = *Treatment eff
 ## Data
 
 | Data Name | Includes |
-|----|----|
+|---------------------------------|---------------------------------------|
 | `data` | All countries. |
 | `data_OECD` | Countries with similar economic conditions to UK. |
 | `data_OECD_HIC` | High income counties with similar economic conditions to UK. |
 | `data_OECD_HIC_UMC` | High and upper-middle income counties with similar economic conditions to UK. |
+
+## Plot Gaps (Treatment Effect)
+
+**Purpose and Meaning of Plotting the Differences**
+
+The plotting the gap overlays the outcomes of the real UK against the synthetic UK overtime which make it easy to understand the pre-treatment fit and treatment effect.
+
+The pre-treatment trends should hover around 0 CO2 emissions per capita displaying a good pre-treatment fit. This means the synthetic control closely tracks the UK's real trends before 2001. The dramatic change in the post treatment shows the divergence of synthetic and real UK outcomes after the policy which is noted as the treatment effect.
+
+**Discussion**
+
+When looking at the pre-treatment trends, the donor pool with just countries in the OECD has the largest range of pre-treatment trends having a the weakest pre-treatment fit. The donor pool with OECD members, HIC, and UMC shows the best pre-treatment fit as the trend stays close to 0. All three donor pools show a consistently negative and widening gap, meaning UK emissions fall well below synthetic in every specification. Thus, the treatment effect is strong and evident in all scenarios.
+
+```{r}
+#| code-fold: true
+#| out-width: "100%"
+#| fig.asp: 1
+
+p2_data_OECD <- scm_data_OECD %>%
+  plot_differences() +
+  labs(title = "Gap: Observed - Synthetic",
+       subtitle = "Donor Pool with countries in the OECD",
+       y = "",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50")) 
+
+
+# data_OECD_HIC
+p2_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_differences() +
+  labs(title = "",
+       subtitle = "Donor Pool with countries in the OECD and HIC",
+       y = "CO2 per capita (power sector)",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50"))
+
+
+# data_OECD_HIC_UMC
+p2_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_differences() +
+  labs(title = "",
+       subtitle = "Donor Pool with countries in the OECD, HIC, and UMC",
+       y = "",
+       x = "") + 
+  theme(plot.subtitle = element_text(color = "grey50"))
+
+
+# Patchwork plots for each dataset on top of one another
+p2_plot <- p2_data_OECD / p2_data_OECD_HIC/ p2_data_OECD_HIC_UMC
+p2_plot
+
+# Save the plot 
+#ggsave(filename = here::here("figs", "p2_plot_dif.png"), 
+       #plot = p2_plot)
+
+```
 
 ## Placebo Tests
 
@@ -76,7 +138,7 @@ In this scenario: If the United Kingdom’s post-treatment gap is distinctive fr
 
 **Interpreting the plots**
 
--   *Pink lines:* The treated unit's (UK) actual gap. The actual UK's CO2 per capita - synthetic UK's CO2 per capita.
+-   *Pink lines:* The treated unit's (UK) actual gap = the actual UK's CO2 per capita - synthetic UK's CO2 per capita.
 
 -   *Grey lines:* The placebo gaps for each control country
 
@@ -91,26 +153,49 @@ All plots show good pre-treatment fit as the UK and control pre-treatment trends
 The three plots show sensitivity to different donor pool specifications. UK's gap and treatment effect is evident in the placebo test using a donor pool with countries in the OECD (`data_OECD`). However, in the plot where the donor pool has OECD, high income, and upper middle class counties (`data_OECD_HIC_UMC`), UK is partial outlier with some grey lines matching UK's gap. Lastly, in the donor pool with OECD and high income counties (`data_OECD_HIC`), the UK no longer looks like a clear outlier. Here the placebo gaps post-2001 are just as large and/or larger than the UK's. Thus, the treatment effect is less statistically credible under this specification, and most credible in the the OECD-only pool.
 
 ```{r}
-# data_OECD
+
 p3_data_OECD <- scm_data_OECD %>%
   plot_placebos() +
-  labs(title = "data_OECD Placebo Tests")
+  labs(title = "Placebo Tests",
+       subtitle = "Donor Pool with countries in the OECD",
+       y = "",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50")) 
 
-p3_data_OECD
 
 # data_OECD_HIC
 p3_data_OECD_HIC <- scm_data_OECD_HIC %>%
   plot_placebos() +
-  labs(title = "data_OECD_HIC Placebo Tests")
+  labs(title = "",
+       subtitle = "Donor Pool with countries in the OECD and HIC",
+       y = "CO2 per capita (power sector)",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50"))
 
-p3_data_OECD_HIC
 
 # data_OECD_HIC_UMC
 p3_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
   plot_placebos() +
-  labs(title = "data_OECD_HIC_UMC Placebo Tests")
+  labs(title = "",
+       subtitle = "Donor Pool with countries in the OECD, HIC, and UMC",
+       y = "",
+       x = "") + 
+  theme(plot.subtitle = element_text(color = "grey50"))
 
-p3_data_OECD_HIC_UMC
+
+# Patchwork plots for each dataset on top of one another
+p3_plot <- p3_data_OECD / p3_data_OECD_HIC/ p3_data_OECD_HIC_UMC
+p3_plot
+
+# Save the plot 
+# ggsave(filename = here::here("figs", "p3_placebo_tests.png"), 
+       #plot = p3_plot)
 
 ```
 
@@ -132,32 +217,57 @@ A large MSPE ratio means the divergence of treatment gap is unlikely due to chan
 
 When looking at the MSPE plot, it is important to see how the treatment group does in comparison to the other counties by dividing the UK's rank by the total number of countries, which is called the permutation p-value.
 
-In the first plot with **`data_OECD`**, there is possible evidence for significance policy intervention as the UK ranks 2 of 23 counties (p = 0.0869).
+In the first plot with OECD members (**`data_OECD`**), there is possible evidence for significance policy intervention as the UK ranks 2 of 23 counties (p = 0.0869).
 
 In the second MSPE plot with a donor pool with counties in the OECD and with HIC (`data_OECD_HIC`), the UK ranks 6th of 33 countries (p= 0.1818). The countries ranking higher than the UK, including Singapore, Belgium, and Italy, have a post-treatment gap that deviates from their pre-period fit. Therefore, the UK's post intervention divergence is not usual and not significant.
 
-Lastly, the strickest donor pool in the OECD with high and middle income counties (`data_OECD_HIC_UMC`) exhibits the UK ranking 3rd behind Oman, and Trinidad & Tobago (p = 0.0577).
+Lastly, the strictness donor pool in the OECD with high and middle income counties (`data_OECD_HIC_UMC`) exhibits the UK ranking 3rd behind Oman, and Trinidad & Tobago (p = 0.0577).
 
 ```{r}
-# data_OECD
+#| code-fold: true
+#| out-width: "100%"
+#| fig.asp: 1
+
 p4_data_OECD <- scm_data_OECD %>%
   plot_mspe_ratio() +
-  labs(title = "data_OECD MSPE Ratio (Permutation Inference)")
+  labs(title = "MSPE Ratio (Permutation Inference)",
+       subtitle = "Donor Pool with countries in the OECD",
+       y = "",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50")) 
 
-p4_data_OECD 
 
 # data_OECD_HIC
 p4_data_OECD_HIC <- scm_data_OECD_HIC %>%
   plot_mspe_ratio() +
-  labs(title = "data_OECD_HIC MSPE Ratio (Permutation Inference)")
+  labs(title = "",
+       subtitle = "Donor Pool with countries in the OECD and HIC",
+       y = "CO2 per capita (power sector)",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50"))
 
-p4_data_OECD_HIC
 
 # data_OECD_HIC_UMC
 p4_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
   plot_mspe_ratio() +
-  labs(title = "data_OECD_HIC_UMC MSPE Ratio (Permutation Inference)")
+  labs(title = "",
+       subtitle = "Donor Pool with countries in the OECD, HIC, and UMC",
+       y = "",
+       x = "") + 
+  theme(plot.subtitle = element_text(color = "grey50"))
 
-p4_data_OECD_HIC_UMC 
 
+# Patchwork plots for each dataset on top of one another
+p4_plot <- p4_data_OECD / p4_data_OECD_HIC/ p4_data_OECD_HIC_UMC
+p4_plot
+
+# Save the plot 
+#ggsave(filename = here::here("figs", "p4_MSPE.png"), 
+       #plot = p4_plot)
 ```
