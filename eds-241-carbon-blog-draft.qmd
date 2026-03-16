@@ -10,13 +10,14 @@ error: false
 ![Source: Getty images from Scientific American. Read more at: https://www.scientificamerican.com/article/epa-to-ease-pollution-enforcement-which-could-exacerbate-lung-illnesses/](images/greenhouse-emissions1.png){fig-alt="Image of industrial smokestacks." fig-align="center"}
 
 ## Outline
-- Study background and introduction
-- Data explanation
-- Synthetic control generation and assessment
-- Evaluating treatment effect- gap plots
-- Robustness checks: placebo, weights, MSPE ratio, balance table
-- Final balance plot comparison
-- Conclusion
+
+-   Study background and introduction
+-   Data explanation
+-   Synthetic control generation and assessment
+-   Evaluating treatment effect- gap plots
+-   Robustness checks: placebo, weights, MSPE ratio, balance table
+-   Final balance plot comparison
+-   Conclusion
 
 All work on this project can be found on our [GitHub Repository](https://github.com/NatBonnet/EDS241-UK-synthetic-control-final).
 
@@ -101,7 +102,7 @@ The Work Bank classifies countries into income categories according to GNI per c
 
 -   \(3\) The authors rescale CO2 emissions per capita to a 1990 and 2000 baseline to normalize the pre-treatment window
 
-## Recreating UK Synthetic Control
+## Replicating UK Synthetic Control
 
 Lépissier & Mildenberger generated synthetic controls using an optimization algorithm to select donor countries to match pre-CCP emissions trajectories in the UK and the synthetic control as closely as possible. This algorithm generates the synthetic UK minimizing mean square predication error (MSPE) of the pre-treatment outcome variable.
 
@@ -332,7 +333,7 @@ p1_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
 p1_data_OECD / p1_data_OECD_HIC / p1_data_OECD_HIC_UMC
 ```
 
-Since the pre-treatment fit assumption is met in our synthetic control recreation, we go on to compare gaps between synthetic UK and observed UK emissions to evaluate treatment effect.
+Since the pre-treatment fit assumption is met in our synthetic control replication, we go on to compare gaps between synthetic UK and observed UK emissions to evaluate treatment effect.
 
 ## Plot Gaps (Treatment Effect)
 
@@ -511,7 +512,12 @@ p4_data_OECD <- scm_data_OECD %>%
        caption = NULL)+
   theme(legend.position = "none", 
         plot.title = element_text(hjust = 0.5), 
-        plot.subtitle = element_text(color = "grey50", hjust = 0.4)) 
+        plot.subtitle = element_text(color = "grey50", hjust = 0.4),
+        axis.text.y = element_text(size = 5)
+        ) 
+
+# Then modify the geom layer directly
+#p4_data_OECD$layers[[1]]$geom_params$width <- 0.6  # default is 0.9, smaller = more spacing
 
 
 # data_OECD_HIC
@@ -524,7 +530,8 @@ p4_data_OECD_HIC <- scm_data_OECD_HIC %>%
        caption = NULL)+
   theme(legend.position = "none", 
         plot.title = element_text(hjust = 0.5), 
-        plot.subtitle = element_text(color = "grey50", hjust = 0.5))
+        plot.subtitle = element_text(color = "grey50", hjust = 0.5), 
+        axis.text.y = element_text(size = 5))
 
 
 # data_OECD_HIC_UMC
@@ -535,8 +542,8 @@ p4_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
        y = "",
        x = "",
        caption = "Treatment: UK Climate Change Programme (2001)") + 
-  theme(plot.subtitle = element_text(color = "grey50", hjust = 0.4))
-
+  theme(plot.subtitle = element_text(color = "grey50", hjust = 0.4), 
+        axis.text.y = element_text(size = 5))
 
 # Patchwork plots for each dataset on top of one another
 p4_plot <- p4_data_OECD / p4_data_OECD_HIC/ p4_data_OECD_HIC_UMC
@@ -577,21 +584,42 @@ Based on which set of countries we incorporate into our MSPE model, per the diff
 Ideally, a properly optimized synthetic control model will have balance, meaning equal or near-equal values across the different predictors between the real United Kingdom and the synthetic version. We use a balance table to compare pre-treatment predictor values the synthetic unit, the real unit, and the donor pool.
 
 ```{r}
-balance_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
-grab_balance_table()
+# Create balance tables 
+balance_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>% # OECD_HIC_UMC 
+  grab_balance_table()
 
-balance_OECD_HIC_UMC
+balance_OECD_HIC <- scm_data_OECD_HIC %>% # OECD_HIC
+  grab_balance_table()
 
-balance_OECD_HIC <- scm_data_OECD_HIC %>%
-grab_balance_table()
+balance_OECD <- scm_data_OECD %>% # OECD 
+  grab_balance_table()
 
-balance_OECD_HIC
 
-balance_OECD <- scm_data_OECD %>%
-grab_balance_table()
+# Clean balance tables 
+# Remove 'EN.ATM.CO2E.PC_' from variable column 
+balance_OECD_HIC_UMC$variable <- gsub("EN.ATM.CO2E.PC_", "", balance_OECD_HIC_UMC$variable) 
+balance_OECD_HIC$variable <- gsub("EN.ATM.CO2E.PC_", "", balance_OECD_HIC$variable) 
+balance_OECD$variable <- gsub("EN.ATM.CO2E.PC_", "", balance_OECD$variable) 
 
-balance_OECD
 
+# Kable tables 
+balance_OECD_HIC_UMC %>% 
+  kable(digits = 4, 
+      caption = "CO2 Emissions Per Capita", 
+      col.names = c("Year", "United Kingdom", "Syntheic UK", "Donor Sample")) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"))
+
+balance_OECD_HIC %>% 
+  kable(digits = 4, 
+      caption = "CO2 Emissions Per Capita", 
+      col.names = c("Year", "United Kingdom", "Syntheic UK", "Donor Sample")) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"))
+
+balance_OECD %>% 
+  kable(digits = 4, 
+      caption = "CO2 Emissions Per Capita", 
+      col.names = c("Year", "United Kingdom", "Syntheic UK", "Donor Sample")) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"))
 ```
 
 **Balance Table Discussion**
@@ -602,7 +630,7 @@ As seen in the balance sheet outputs, there is a strong balance between all thre
 
 ![](images/figure_4.png)
 
-We recreated the difference in pre-treatment CO2 emissions, and displayed the weighted and weighted means in reference to Figure 2 in Lépissier & Mildenberger. This figure shows that our synthetic control model closely matches the pre-treatment balance found in the original paper.
+We replicated the difference in pre-treatment CO2 emissions, and displayed the weighted and weighted means in reference to Figure 2 in Lépissier & Mildenberger. This figure shows that our synthetic control model closely matches the pre-treatment balance found in the original paper.
 
 ```{r final-plot}
 #| out-width: "100%"
@@ -648,16 +676,16 @@ scm_data_OECD_HIC_UMC %>%
 
 ## Conclusion
 
-We have produced a very near recreation of the original Lépissier and Mildenberger study. We utilized an existing package `tidysynth` to create our synthetic control model. While initially, we had attempted to average the CO2 emissions per capita across the pre-treatment time window, by country. This, however, led to poor model fit, and thus would not serve as an accurate counter factual.
+We have produced a very near replication of the original Lépissier and Mildenberger study. We utilized an existing package `tidysynth` to create our synthetic control model. While initially, we had attempted to average the CO2 emissions per capita across the pre-treatment time window, by country. This, however, led to poor model fit, and thus would not serve as an accurate counter factual.
 
 To create a more accurate synthetic control, we amended our model, and generated synthetic outcomes based on yearly emissions by donor country for the most accurate resolution of emissions. This provided much more accurate results that closely followed the real emission levels within the UK. With our more confident synthetic model, we progressed to modeling the effect of the treatment.
 
-Utilizing all three donor pool sets, we modeled the gap, and found that within the study's target years of 1990-2005, our model produces a very accurate recreation of the true per capita emissions with the UK. From there we then ran a series of placebo tests across the same data sets, and found strong match with these as well.
+Utilizing all three donor pool sets, we modeled the gap, and found that within the study's target years of 1990-2005, our model produces a very accurate replication of the true per capita emissions with the UK. From there we then ran a series of placebo tests across the same data sets, and found strong match with these as well.
 
 From there, we plotted the MSPE ratios, which show the effect of the treatment in comparison to the pre-treatment error. While we saw differences in the resulting ratio between the different donor pools, we saw a strong ratio value with the pool used within the study. Specifically, the donor pool including OECD, HIC, and UMC countries. This high ratio, with the donor pool utilized in the study, gives us confidence in stating that the change in carbon emissions we modeled is a causal outcome of the treatment.
 
 As a final robustness check, we created balance tables of the the three different data sets to determine match between the synthetic and real UK. We found extremely close values across all the predictors. While there was some variation in balance between the two UKs and the respective donor pool, depending on which pool of countries was used, there was a consistent and close matching in each table between the synthetic and real United Kingdoms.
 
-To show our model's results, we recreated the pre-treatment means of the weighted and unweighted per-capita emissions, and found that our results closely match the results shown in Figure 2 of the paper.
+To show our model's results, we replicated the pre-treatment means of the weighted and unweighted per-capita emissions, and found that our results closely match the results shown in Figure 2 of the paper.
 
-In summary, using different means to achieve a SCM method, we have recreated a similar synthetic control model, showed accurate fit between our model and the real UK, and produced results very close to those found within the paper.
+In summary, using different means to achieve a SCM method, we have replicated a similar synthetic control model, showed accurate fit between our model and the real UK, and produced results very close to those found within the paper.
