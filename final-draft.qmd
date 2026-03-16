@@ -10,13 +10,14 @@ error: false
 ![Source: Getty images from Scientific American. Read more at: https://www.scientificamerican.com/article/epa-to-ease-pollution-enforcement-which-could-exacerbate-lung-illnesses/](images/greenhouse-emissions1.png){fig-alt="Image of industrial smokestacks." fig-align="center"}
 
 ## Outline
-- Study background and introduction
-- Data explanation
-- Synthetic control generation and assessment
-- Evaluating treatment effect- gap plots
-- Robustness checks: placebo, weights, MSPE ratio, balance table
-- Final balance plot comparison
-- Conclusion
+
+-   Study background and introduction
+-   Data explanation
+-   Synthetic control generation and assessment
+-   Evaluating treatment effect- gap plots
+-   Robustness checks: placebo, weights, MSPE ratio, balance table
+-   Final balance plot comparison
+-   Conclusion
 
 All work on this project can be found on our [GitHub Repository](https://github.com/NatBonnet/EDS241-UK-synthetic-control-final).
 
@@ -32,7 +33,7 @@ We are interested in understanding what the UK's carbon emissions might have loo
 
 To do so we need to create a strong counter factual to simulate what *would* have happened. The authors take the synthetic control method (SCM) to manufacture a synthetic UK. This approach is less restrictive than a difference-in-difference strategy would be to compare other countries without a carbon policy. A SCM method uses weighted elements of donor countries to create a more accurate synthetic counterfactual, where a DiD method must use the complete picture of existing similar data.
 
-The synthetic UK is the combination of weighted averages of counties that did not receive the policy intervention. To create the best-fit synthetic UK, donor country emissions are weighted to match UK pre-treatment emissions trends. Countries are given higher weights if they more closely match observed pre-treatment trends in the UK. 
+The synthetic UK is the combination of weighted averages of counties that did not receive the policy intervention. To create the best-fit synthetic UK, donor country emissions are weighted to match UK pre-treatment emissions trends. Countries are given higher weights if they more closely match observed pre-treatment trends in the UK.
 
 ### Assessing Treatment Effect
 
@@ -87,14 +88,13 @@ The Work Bank classifies countries into income categories according to GNI per c
 
 -   \(1\) SUTVA (stable unit treatment values assumption). There is no spillover of CCP enactment to other countries in the donor pool
 
--   \(2\) Variables used to form the weights must have values for donor pool countries that are similar to those of the UK. This minimizes interpolation bias. Interpolation bias introduces error by assuming a smooth or linear relationship between data points. Our procedure interpolates across regions with very different characteristics, so we use more similar countries to reduce inaccurate assumptions. 
+-   \(2\) Variables used to form the weights must have values for donor pool countries that are similar to those of the UK. This minimizes interpolation bias. Interpolation bias introduces error by assuming a smooth or linear relationship between data points. Our procedure interpolates across regions with very different characteristics, so we use more similar countries to reduce inaccurate assumptions.
 
 -   \(3\) Strong pretreatment fit between synthetic UK and actual UK. The only credible way to assess treatment effect is by comparing against a strong counter factual, which needs to behave essentially the same as the actual UK.
 
-
 ### Study approach to address assumptions
 
--   \(1\) Authors selected the donor sample based on countries that had not passed any major climate legislation until the 2005 European Union's Emissions Trading Scheme (EU ETS). The UK was the only country with the CCP in 2001. This attempts to get the best possible causal effect calculation while minimizing spillover effects. By comparing countries without unilateral climate policies in place, we more accurately represent what *would* have happened given no policy. 
+-   \(1\) Authors selected the donor sample based on countries that had not passed any major climate legislation until the 2005 European Union's Emissions Trading Scheme (EU ETS). The UK was the only country with the CCP in 2001. This attempts to get the best possible causal effect calculation while minimizing spillover effects. By comparing countries without unilateral climate policies in place, we more accurately represent what *would* have happened given no policy.
 
 -   \(2\) Using per capita emissions to avoid interpolation bias. Per capita data normalizes across country population size so we do not compare emissions on different magnitudes across donor pool countries.
 
@@ -130,7 +130,7 @@ source(here("R", "plot_weights_filtered.R"))
 
 ```
 
-First, we attempted to create a synthetic control that averaged CO2 emissions per capita across the pre-treatment time period by country. We then assessed pre-treatment fit to understand our counter factual usability. 
+First, we attempted to create a synthetic control that averaged CO2 emissions per capita across the pre-treatment time period by country. We then assessed pre-treatment fit to understand our counter factual usability.
 
 ```{r syth1}
 #| output: false
@@ -243,7 +243,7 @@ p0_data_OECD / p0_data_OECD_HIC/ p0_data_OECD_HIC_UMC
 
 ### Synthetic Control Generation
 
-Due to the previous outcome, we generated synthetic outcomes based on yearly emissions by donor country for the most accurate resolution of emissions. 
+Due to the previous outcome, we generated synthetic outcomes based on yearly emissions by donor country for the most accurate resolution of emissions.
 
 ```{r}
 run_scm <- function(data) {
@@ -449,7 +449,6 @@ p3_plot
        #plot = p3_plot)
 
 ```
-
 
 ```{r synth-weights-table}
 #| code-fold: true
