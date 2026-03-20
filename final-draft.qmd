@@ -1,7 +1,7 @@
 ---
 title: "EDS 241- Using a Synthetic Control Method to Replicate a Study of Unilateral Climate Policy"
 author: "Nathalie Bonnet, Megan Hessel, Stephan Kadonoff"
-date: March 5 2026
+date: March 20 2026
 format: html
 warning: false
 error: false
@@ -25,7 +25,7 @@ All work on this project can be found on our [GitHub Repository](https://github.
 
 This analysis aims to reproduce the results of Lépissier and Mildenberger's (2021) study, *Unilateral Climate Policies Can Substantially Reduce National Carbon Pollution*. The authors employed a synthetic control method (SCM) to estimate the causal effect of the UK’s 2001 Climate Change Programme (CCP) on the country’s carbon emissions. Their main finding demonstrates that CCP reduced the UK's carbon emissions. CO2 emissions per capita were 9.8% lower in 2005 relative to what they would have been if the CCP had not been passed, demonstrating that unilateral climate policies can still reduce carbon emissions even in the absence of a binding global climate agreement.
 
-### The Fundamental Problem & the SMC Fix
+### The Fundamental Problem & the Synthetic Control Method (SCM) Fix
 
 The 2001 UK CCP is a complex reform that included a carbon tax on large-scale energy users, industry-negotiated exemptions from the tax for meeting reduction targets, and a voluntary emissions trading scheme. It was one of the first comprehensive climate reform packages passed globally, in advance of action by most other Organisation for Economic Co-operation and Development (OECD) countries.
 
@@ -39,9 +39,9 @@ The gap between the synthetic and real UK after policy intervention is observed 
 
 Before the 2001 policy: Real UK $\approx$ Synthetic UK.
 
-After the 2001 policy: The gap between Real UK and Synthetic UK = *Treatment effect.*
+After the 2001 policy: The gap between the real UK and synthetic UK = *Treatment effect.*
 
-### Research Question
+### Research Questions
 
 **Did United Kingdom's 2001 Climate Change Programme (CCP) reduce per capita CO₂ emissions?**
 
@@ -53,9 +53,9 @@ After the 2001 policy: The gap between Real UK and Synthetic UK = *Treatment eff
 
 -   Donor pool: 51 countries with...
 
-    -   \(1\) in OECD or classified by the World Bank as upper middle–income (UMC) or high-income (HIC) countries at the time of treatment in 2001
+    -   \(1\) in Organisation for Economic Co-operation and Development (OECD) or classified by the World Bank as upper middle–income (UMC) or high-income (HIC) countries at the time of treatment in 2001
 
-    -   \(2\) Population greater than 250,000,
+    -   \(2\) Population greater than 250,000
 
     -   \(3\) No carbon pricing policy
 
@@ -63,28 +63,28 @@ After the 2001 policy: The gap between Real UK and Synthetic UK = *Treatment eff
 
 -   In this study, we investigate and run SCM for 3 different donor pools. This positions the UK's CCP to be evaluated against a wide pool of donor countries by pre-treatment carbon emissions:
 
-    -   \(1\) Countries with similar economic conditions to UK.
+    -   \(1\) Countries with similar economic conditions to the UK - in the OECD.
 
-    -   \(2\) High income counties with similar economic conditions to UK.
+    -   \(2\) High income counties (HIC) with similar economic conditions to UK (OECD).
 
-    -   \(3\) High and upper-middle income counties with similar economic conditions to UK.
+    -   \(3\) High and upper-middle income (HIC and UMC) counties with similar economic conditions to UK (OECD).
 
-The Work Bank classifies countries into income categories according to GNI per capita in US dollars. In fiscal year 2001, the World Bank classified high-income (HIC) countries as those with GNI per capita above 9,265 US\$ and upper middle–income (UMC) countries as those with GNI per capita in the 2,996 US\$ to 9,265 US\$ range. “EN.ATM.CO2E.PC” (CO2 emissions per capita in metric tons).
+The Work Bank classifies countries into income categories according to Gross National Income (GNI) per capita in US dollars. In fiscal year 2001, the World Bank classified high-income (HIC) countries as those with GNI per capita above 9,265 US\$ and upper middle–income (UMC) countries as those with GNI per capita in the 2,996 US\$ to 9,265 US\$ range. “EN.ATM.CO2E.PC” (CO2 emissions per capita in metric tons).
 
--   Additionally, only countries with a population greater than 250,000 without a carbon pricing policy in place in 2001 were considered for the donor pool.
+Additionally, only countries with a population greater than 250,000 without a carbon pricing policy in place in 2001 were considered for the donor pool.
 
 ## Data
 
 | Data Name | Includes |
-|---------------------------------|---------------------------------------|
-| `data` | Carbon emissions data from all accessible countries |
-| `data_OECD` | Carbon emissions from countries with similar economic conditions to UK. |
-| `data_OECD_HIC` | Carbon emissions from high income counties with similar economic conditions to UK. |
-| `data_OECD_HIC_UMC` | Carbon emissions from high and upper-middle income counties with similar economic conditions to UK. |
+|---------------------------|--------------------------------------------|
+| `data` | Carbon emissions data from all accessible countries. Includes 157 countries. |
+| `data_OECD` | Carbon emissions from countries with similar economic conditions to UK. Includes 23 countries. |
+| `data_OECD_HIC` | Carbon emissions from high income counties with similar economic conditions to UK. Includes 33 countries. |
+| `data_OECD_HIC_UMC` | Carbon emissions from high and upper-middle income counties with similar economic conditions to UK. Includes 51 countries. |
 
 ## Study Assumptions
 
--   \(1\) SUTVA (stable unit treatment values assumption). There is no spillover of CCP enactment to other countries in the donor pool
+-   \(1\) Stable unit treatment values assumption (SUTVA): There is no spillover of CCP enactment to other countries in the donor pool.
 
 -   \(2\) Variables used to form the weights must have values for donor pool countries that are similar to those of the UK. This minimizes interpolation bias. Interpolation bias introduces error by assuming a smooth or linear relationship between data points. Our procedure interpolates across regions with very different characteristics, so we use more similar countries to reduce inaccurate assumptions.
 
@@ -94,9 +94,9 @@ The Work Bank classifies countries into income categories according to GNI per c
 
 -   \(1\) Authors selected the donor sample based on countries that had not passed any major climate legislation until the 2005 European Union's Emissions Trading Scheme (EU ETS). The UK was the only country with the CCP in 2001. This attempts to get the best possible causal effect calculation while minimizing spillover effects. By comparing countries without unilateral climate policies in place, we more accurately represent what *would* have happened given no policy.
 
--   \(2\) Using per capita emissions to avoid interpolation bias. Per capita data normalizes across country population size so we do not compare emissions on different magnitudes across donor pool countries.
+-   \(2\) Interpolation bias can become critial when assessing various countries with very different characteristics. To avoid interpolation bias, the study used per capita emissions and used weights from similar countries when creating the donor pool. Per capita data normalizes across country population size so we do not compare emissions on different magnitudes across donor pool countries. Therefore, per capita data and weighting only similar countries to the UK limits differing characteristics in the donor pool, and thus minimizes interpolation bias.
 
--   \(3\) The authors rescale CO2 emissions per capita to a 1990 and 2000 baseline to normalize the pre-treatment window
+-   \(3\) The authors rescale CO2 emissions per capita to a 1990 and 2000 baseline to normalize the pre-treatment window.
 
 ## Replicating UK Synthetic Control
 
@@ -113,7 +113,7 @@ library(here)
 library(kableExtra)
 ```
 
-We sourced the original emissions datasets from 1. OECD countries, 2. high-income countries (OECD), and 3. high-income (OECD_HIC) and upper-middle-income countries (OECD_HIC_UMD). These datasets were generated by the authors using World Bank data to classify OECD countries, HIC, and UMC. These filter out countries with populations below 250,000 and carbon policies in place in the study period.
+We sourced the original emissions datasets from 1. OECD countries (`OECD`), 2. high-income countries (`OECD_HIC`), and 3. high-income and upper-middle-income countries (`OECD_HIC_UMC`). These datasets were generated by the authors using World Bank data to classify OECD countries, HIC, and UMC. These filter out countries with populations below 250,000 and carbon policies in place in the study period.
 
 ```{r source-functions}
 #| code-fold: true
@@ -145,7 +145,8 @@ First, we attempted to create a synthetic control that averaged CO2 emissions pe
 #| code-fold: true
 #| output: false
 
-# data_OECD
+# First attempt of creating synthetic control for the 3 different donor pools 
+# 1) data_OECD
 scm_data_OECD0 <- data_OECD %>%
   synthetic_control(
     outcome = `EN.ATM.CO2E.PC`, 
@@ -167,7 +168,7 @@ scm_data_OECD0 <- data_OECD %>%
   generate_control() # Generate synthetic control
 
 
-# data_OECD_HIC
+# 2) data_OECD_HIC
 scm_data_OECD_HIC0 <- data_OECD_HIC %>%
   synthetic_control(
     outcome = `EN.ATM.CO2E.PC`, 
@@ -189,7 +190,7 @@ scm_data_OECD_HIC0 <- data_OECD_HIC %>%
   generate_control() # Generate synthetic control
 
 
-# data_OECD_HIC_UMC
+# 3) data_OECD_HIC_UMC
 scm_data_OECD_HIC_UMC0 <- data_OECD_HIC %>%
   synthetic_control(
     outcome = `EN.ATM.CO2E.PC`, 
@@ -213,7 +214,7 @@ scm_data_OECD_HIC_UMC0 <- data_OECD_HIC %>%
 
 ```
 
-**Pre-Treatment Fit Interpretation** In this plot, our synthetic control UK is represented by the pink dashed line to show projected carbon emissions *without the CCP*. The gray line represents the actual observed per capita carbon emissions in the UK post policy implementation.
+**Pre-Treatment Fit Interpretation:** In this plot, our synthetic control UK is represented by the pink dashed line to show projected carbon emissions *without the CCP*. The gray line represents the actual observed per capita carbon emissions in the UK post policy implementation.
 
 By plotting the trends of the resulting synthetic controls across time, we can see that this method results in a poor pre-treatment fit, which violates the assumption of the synthetic control method to make a meaningful causal effect estimation.
 
@@ -222,36 +223,47 @@ By plotting the trends of the resulting synthetic controls across time, we can s
 #| out-width: "100%"
 #| fig.asp: 1
 
-# data_OECD
+# Plotting the trends of the SCM results with `plot_trends` for the 3 donor pools 
+# 1) data_OECD
 p0_data_OECD <- scm_data_OECD0 %>%
   plot_trends() +
-  labs(title = "UK vs Synthetic UK (Averaged Across Pre-Treatment Period)",
-       subtitle = "Poor pre-treatment match when donor country emissions are averaged 1990-2000",
+  labs(title = "", 
+       subtitle = "OECD Countries",
        y = "",
        x = "", 
        caption = NULL)+
   theme(legend.position = "none", 
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50"))
 
-# data_OECD_HIC
+
+# 2) data_OECD_HIC
 p0_data_OECD_HIC <- scm_data_OECD_HIC0 %>%
   plot_trends() +
   labs(title = "",
+       subtitle = "OECD and HIC Countries",
        y = "CO2 per capita (power sector)",
        x = "", 
        caption = NULL)+
   theme(legend.position = "none", 
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50"))
 
-# data_OECD_HIC_UMC
+# 3) data_OECD_HIC_UMC
 p0_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC0 %>%
   plot_trends() +
   labs(title = "",
+       subtitle = "OECD and HIC Countries",
        y = "",
-       x = "")
+       x = "") + 
+  theme(plot.subtitle = element_text(color = "grey50"))
 
 # Patchwork plots for each dataset on top of one another
-p0_data_OECD / p0_data_OECD_HIC/ p0_data_OECD_HIC_UMC 
+p0_data_OECD / p0_data_OECD_HIC/ p0_data_OECD_HIC_UMC + 
+  # Add title and subtitles
+    plot_annotation(title = 'UK vs Synthetic UK (Averaged Across Pre-Treatment Period)',
+                    subtitle = 'Poor pre-treatment match when donor country emissions are averaged 1990-2000', theme = theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)))
+  
 ```
 
 ### Synthetic Control Generation
@@ -260,9 +272,11 @@ Due to the previous outcome, we generated synthetic outcomes based on yearly emi
 
 ```{r}
 #| code-fold: true
+
+# # Second attempt of creating synthetic control for the 3 different donor pools with a FUNCTION 
 run_scm <- function(data) {
   
-  pred_years <- 1990:2000
+  pred_years <- 1990:2000 # time frame 
   
   pipeline <- data %>%
     synthetic_control(
@@ -284,6 +298,7 @@ run_scm <- function(data) {
     generate_control()
 }
 
+# Running function for the 3 donor pools 
 scm_data_OECD        <- run_scm(data_OECD)
 scm_data_OECD_HIC    <- run_scm(data_OECD_HIC)
 scm_data_OECD_HIC_UMC <- run_scm(data_OECD_HIC_UMC)
@@ -298,36 +313,41 @@ Plotting the outcomes of synthetic control across all 3 donor pool options, we s
 #| fig.asp: 1
 #| code-fold: true
 
-# data_OECD
+# Plotting the trends of the SCM results with `plot_trends` for the 3 donor pools 
+
+# 1) data_OECD
 p1_data_OECD <- scm_data_OECD %>%
   plot_trends() +
   labs(title = "UK vs Synthetic UK (Averaged by Year)",
-       subtitle = "OECD",
+       subtitle = "OECD Countries",
        y = "",
        x = "", 
        caption = NULL)+
   theme(legend.position = "none", 
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50"))
 
-# data_OECD_HIC
+# 2) data_OECD_HIC
 p1_data_OECD_HIC <- scm_data_OECD_HIC %>%
   plot_trends() +
   labs(title = "",
-       subtitle = "OECD and HIC",
+       subtitle = "OECD and HIC Countries",
        y = "CO2 per capita (power sector)",
        x = "", 
        caption = NULL) +
-  theme(legend.position = "none")
+  theme(legend.position = "none", 
+        plot.subtitle = element_text(color = "grey50")) 
 
-# data_OECD_HIC_UMC
+# 3) data_OECD_HIC_UMC
 p1_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
   plot_trends() +
   labs(title = "",
-       subtitle = "OECD, HIC, and UMC",
+       subtitle = "OECD, HIC, and UMC Countries",
        y = "",
-       x = "")
+       x = "") + 
+  theme(plot.subtitle = element_text(color = "grey50"))
 
-p1_data_OECD / p1_data_OECD_HIC / p1_data_OECD_HIC_UMC
+p1_data_OECD / p1_data_OECD_HIC / p1_data_OECD_HIC_UMC # Putting plots together 
 ```
 
 Since the pre-treatment fit assumption is met in our synthetic control replication, we go on to compare gaps between synthetic UK and observed UK emissions to evaluate treatment effect.
@@ -338,17 +358,20 @@ Since the pre-treatment fit assumption is met in our synthetic control replicati
 
 The treatment gap plot overlays the outcomes of the real UK against the synthetic UK overtime which make it easy to understand the pre-treatment fit and treatment effect.
 
-The pre-treatment trends should hover around 0 CO2 emissions per capita displaying a good pre-treatment fit. This means the synthetic control closely tracks the UK's real trends before 2001. The dramatic change in the post treatment shows the divergence of synthetic and real UK outcomes after the policy which is noted as the treatment effect.
+The pre-treatment trends should hover around 0 CO2 emissions per capita displaying a good pre-treatment fit. This means the synthetic control closely tracks the UK's real trends before 2001. The dramatic change in the post-treatment shows the divergence of synthetic and real UK outcomes after the policy which is noted as the treatment effect.
 
 ```{r}
 #| code-fold: true
 #| out-width: "100%"
 #| fig.asp: 1
 
+# Plotting the gaps of the SCM results with `plot_difference` for the 3 donor pools 
+
+# 1) data_OECD
 p2_data_OECD <- scm_data_OECD %>%
   plot_differences() +
   labs(title = "Gap: Observed - Synthetic",
-       subtitle = "Donor Pool with countries in the OECD",
+       subtitle = "OECD Countries",
        y = "",
        x = "", 
        caption = NULL)+
@@ -357,11 +380,11 @@ p2_data_OECD <- scm_data_OECD %>%
         plot.subtitle = element_text(color = "grey50")) 
 
 
-# data_OECD_HIC
+# 2) data_OECD_HIC
 p2_data_OECD_HIC <- scm_data_OECD_HIC %>%
   plot_differences() +
   labs(title = "",
-       subtitle = "Donor Pool with countries in the OECD and HIC",
+       subtitle = "OECD and HIC Countries",
        y = "CO2 per capita (power sector)",
        x = "", 
        caption = NULL)+
@@ -370,11 +393,11 @@ p2_data_OECD_HIC <- scm_data_OECD_HIC %>%
         plot.subtitle = element_text(color = "grey50"))
 
 
-# data_OECD_HIC_UMC
+# 3) data_OECD_HIC_UMC
 p2_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
   plot_differences() +
   labs(title = "",
-       subtitle = "Donor Pool with countries in the OECD, HIC, and UMC",
+       subtitle = "OECD, HIC, and UMC Countries",
        y = "",
        x = "") + 
   theme(plot.subtitle = element_text(color = "grey50"))
@@ -398,7 +421,7 @@ When looking at the pre-treatment trends, the donor pool with just countries in 
 
 **Purpose of the Placebo Tests**
 
-The placebo tests assess whether the estimated treatment effect is statistically meaningful. The SCM is re-run for each control unit, pretending the control unit is the treated unit. The results are a distribution of "fake" treatment effects where no real treatment occurred (hence, the name "placebo"). If the true treatment effect is genuine, the treated unit's gap should appear as an outlier relative to this placebo distribution. In other words, control units should not exhibit effects of similar magnitude to the treated unit. The goal is to examine if the treatment effect is due to the intervention or random variance and noise, and this is done by plotting the treated and placebo SCM results together.
+The placebo tests assess whether the estimated treatment effect is statistically meaningful. The SCM is re-run for each control unit, pretending the control unit is the treated unit. The results are a distribution of "fake" treatment effects where no real treatment occurred (hence, the name "placebo"). If the treatment effect is genuine, the treated unit's gap should appear as an outlier relative to this placebo distribution. In other words, control units should not exhibit effects of similar magnitude to the treated unit. The goal is to examine if the treatment effect is due to the intervention or random variance and noise, and this is done by plotting the treated and placebo SCM results together.
 
 In this scenario: If the United Kingdom’s post-treatment gap is distinctive from the other placebo units, this suggests that the estimated treatment effect reflects a true impact rather than random variation and noise.
 
@@ -406,7 +429,7 @@ In this scenario: If the United Kingdom’s post-treatment gap is distinctive fr
 
 -   **Pink lines***:* The treated unit's (UK) actual gap which is the the actual UK's CO2 per capita minus the synthetic UK's CO2 per capita.
 
--   **Grey lines***:* The placebo gaps for each control country
+-   **Grey lines***:* The placebo gaps for each control country.
 
 -   Good **pre-treatment fit** can be noted by all the pre-treatment lines centering around zero.
 
@@ -417,10 +440,13 @@ In this scenario: If the United Kingdom’s post-treatment gap is distinctive fr
 #| out-width: "100%"
 #| fig.asp: 1
 
+# Plotting the gaps of the SCM results with `plot_placebos` for the 3 donor pools 
+
+# 1) data_OECD
 p3_data_OECD <- scm_data_OECD %>%
   plot_placebos(prune = FALSE) +
   labs(title = "Placebo Tests",
-       subtitle = "Donor Pool with countries in the OECD",
+       subtitle = "OECD Countries",
        y = "",
        x = "", 
        caption = NULL)+
@@ -429,11 +455,11 @@ p3_data_OECD <- scm_data_OECD %>%
         plot.subtitle = element_text(color = "grey50")) 
 
 
-# data_OECD_HIC
+# 2) data_OECD_HIC
 p3_data_OECD_HIC <- scm_data_OECD_HIC %>%
   plot_placebos(prune = FALSE) +
   labs(title = "",
-       subtitle = "Donor Pool with countries in the OECD and HIC",
+       subtitle = "OECD and HIC Countries",
        y = "CO2 per capita (power sector)",
        x = "", 
        caption = NULL)+
@@ -442,11 +468,11 @@ p3_data_OECD_HIC <- scm_data_OECD_HIC %>%
         plot.subtitle = element_text(color = "grey50"))
 
 
-# data_OECD_HIC_UMC
+# 3) data_OECD_HIC_UMC
 p3_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
   plot_placebos(prune = FALSE) +
   labs(title = "",
-       subtitle = "Donor Pool with countries in the OECD, HIC, and UMC",
+       subtitle = "OECD, HIC, and UMC Countries",
        y = "",
        x = "") + 
   theme(plot.subtitle = element_text(color = "grey50"))
@@ -466,7 +492,7 @@ p3_plot
 
 Across all three donor pools, the UK's pre-treatment gap hovers near zero, indicating a strong synthetic control fit. However, several placebo units diverge widely from zero pre-treatment, reflecting poor fit for those control units.
 
-Following treatment in 2001, the UK shows no meaningful divergence from its pre-treatment trend or the placebo distributions, suggesting the intervention had no detectable effect on power sector CO2 per capita. Overall, the UK Climate Change Programme does not appear to have had a statistically significant effect relative to the counter factual across any of the three donor pools. These results are different from the Lépissier and Mildenberger study (2021) .
+Following treatment in 2001, the UK shows no meaningful divergence from its pre-treatment trend or the placebo distributions, suggesting the intervention had no detectable effect on power sector CO2 per capita. Overall, the UK Climate Change Programme does not appear to have had a statistically significant effect relative to the counter factual across any of the three donor pools. These results are different from the Lépissier and Mildenberger study (2021) where they found the UK's causal effect of the CCP to be at the edge of the placebo/null distributions. Their study's placebo test found the treatment effect is unlikely due to change alone.
 
 #### Comparing Donor Weights
 
@@ -475,14 +501,19 @@ The authors of the original study report their top donor countries as 19% Poland
 ```{r synth-weights-table}
 #| code-fold: true
 
+# Finding the donor pool country's weights for each donor pool 
+
+# 1) data_OECD
 scm_data_OECD %>%
-  grab_unit_weights() %>%
-  arrange(desc(weight)) %>% 
-  filter(weight > 0.01) %>% 
+  grab_unit_weights() %>% # Grabbing the weights 
+  arrange(desc(weight)) %>% # Arrange in descending order 
+  filter(weight > 0.01) %>% # Just the weights greater than 0.01 
+  # Make it pretty with kable table 
   kable(caption = "Donor Pool Makeup of OECD Countries", 
         col.names = c("Unit", "Weight")) %>%
   kable_styling(bootstrap_options = c("striped", "condensed"))
 
+# 2) data_OECD_HIC
 scm_data_OECD_HIC %>% 
     grab_unit_weights() %>%
   arrange(desc(weight)) %>% 
@@ -491,6 +522,7 @@ scm_data_OECD_HIC %>%
         col.names = c("Unit", "Weight")) %>%
   kable_styling(bootstrap_options = c("striped", "condensed"))
 
+# 3) data_OECD_HIC_UMC
 scm_data_OECD_HIC_UMC %>% 
     grab_unit_weights() %>%
   arrange(desc(weight)) %>% 
@@ -503,28 +535,19 @@ scm_data_OECD_HIC_UMC %>%
 ```{r  synth-weights-plots}
 #| code-fold: true 
 
-# Ploting scm_data_OECD_HIC_UMC donor pool weights
+# Ploting `scm_data_OECD_HIC_UMC` donor pool weights b/c closest similarity to paper's donor pool makeup
 plot_weights(scm_data_OECD_HIC_UMC) +
   labs(title = "OCED, HIC, and UMC Donor Pool Composition") +
   theme(plot.title = element_text(hjust = 0.5, size = 12),
     plot.subtitle = element_text(color = "grey50", hjust = 0.5))
 
-
-# scm_data_OECD %>% 
-#     plot_weights_filtered()
-# 
-# scm_data_OECD_HIC %>% 
-#     plot_weights_filtered()
-#     
-# scm_data_OECD_HIC_UMC %>% 
-#     plot_weights_filtered()
 ```
 
 ## MSPE Ratio Plot
 
 **Purpose and Meaning of MSPE Ratio**
 
-The Mean Squared Prediction Error (MSPE)ratio compares post-treatment signal to the pre-treatment error which explains the observed outcome of a unit and its synthetic control (UK and synthetic UK), before and after treatment.
+The Mean Squared Prediction Error (MSPE) ratio compares post-treatment signal to the pre-treatment error which explains the observed outcome of a unit and its synthetic control (UK and synthetic UK), before and after treatment.
 
 $$
 \text{MSPE Ratio} = \frac{MSPE_{post}}{MSPE_{pre}}
@@ -538,10 +561,13 @@ A large MSPE ratio means the divergence of treatment gap is unlikely due to chan
 #| code-fold: true
 #| output: false 
 
+# Plotting the MSPE ratios of the SCM results with `plot_mspe_ratio` for the 3 donor pools 
+
+# 1) data_OECD
 p4_data_OECD <- scm_data_OECD %>%
   plot_mspe_ratio() +
   labs(title = "MSPE Ratio (Permutation Inference)",
-       subtitle = "OECD Countries",
+       subtitle = "Donor Pool with OECD Countries",
        y = "CO2 per capita (power sector)",
        x = "", 
        caption = NULL)+
@@ -551,12 +577,11 @@ p4_data_OECD <- scm_data_OECD %>%
         axis.text.y = element_text(size = 7)
         ) 
 
-
-# data_OECD_HIC
+# 2) data_OECD_HIC
 p4_data_OECD_HIC <- scm_data_OECD_HIC %>%
   plot_mspe_ratio() +
   labs(title = "",
-       subtitle = "OECD and HIC Countries",
+       subtitle = "Donor Pool with OECD and HIC Countries",
        y = "CO2 per capita (power sector)",
        x = "", 
        caption = NULL)+
@@ -566,11 +591,11 @@ p4_data_OECD_HIC <- scm_data_OECD_HIC %>%
         axis.text.y = element_text(size = 7))
 
 
-# data_OECD_HIC_UMC
+# 3) data_OECD_HIC_UMC
 p4_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
   plot_mspe_ratio() +
   labs(title = "",
-       subtitle = "OECD, HIC, and UMC Countries",
+       subtitle = "Donor Pool with OECD, HIC, and UMC Countries",
        y = "CO2 per capita (power sector)",
        x = "",
        caption = "Treatment: UK Climate Change Programme (2001)") + 
@@ -595,19 +620,23 @@ p4_data_OECD_HIC_UMC
 
 ```{r}
 #| code-fold: true 
+
+# Putting the important MPSE info from the SCM results with `grab_significance` from all 3 donor pools 
+
+# 1) data_OECD
 OECD_rank <- scm_data_OECD %>%
   grab_significance() %>%  
   filter(unit_name == "United Kingdom")
-
+# 2) data_OECD_HIC
 OECD_HIC_rank<- scm_data_OECD_HIC %>%
   grab_significance() %>%  
   filter(unit_name == "United Kingdom")
-
+# 2) data_OECD_HIC_UMC
 OECD_HIC_UMC_rank <- scm_data_OECD_HIC_UMC %>%
   grab_significance() %>% 
   filter(unit_name == "United Kingdom")
 
-
+# Important MPSE info into 1 pretty table 
 bind_rows(
   grab_significance(scm_data_OECD) %>% filter(type == "Treated") %>% mutate(group = "OECD"),
   grab_significance(scm_data_OECD_HIC) %>% filter(type == "Treated") %>% mutate(group = "OECD_HIC"),
@@ -624,7 +653,7 @@ When looking at the MSPE plot, it is important to see how the treatment group do
 
 Each MSPE ratio plot displays the same trend of the UK ranking #1 with a large gap in MSPE ratio from other countries, making the UK a clear outlier.
 
-Comparing MSPE outputs for the UK alone across all donor groups, the most minimized MSPE is in the widest donor pool, with a pre-treatment MSPE ratio of 0.0002, which is the closest to the study’s finding of a 0.00012 pre-treatment MSPE ratio. We see that against an , all donor groups have a significant post treatment gap.
+Comparing MSPE outputs for the UK alone across all donor groups, the stongest MSPE ratio is in the widest donor pool, with a pre-treatment MSPE ratio of 0.0002 (which is the closest to the study’s finding of a 0.00012 pre-treatment MSPE ratio) and a large MSPE ratio of 2334.75. The pre-MSPE values near zero (0.0002–0.0022) indicate an excellent pre-treatment fit across all three donor pools. Examining the Fisher's p-value against an $a < 0.05$, all donor groups have a significant treatment gap.
 
 Based on which set of countries we incorporate into our MSPE model, per the different datasets, we see different treatment-effect gaps. Utilizing the data with the most countries, which includes OECD, HIC, and UMC designated countries, we see that the model produces the described result.
 
@@ -632,6 +661,8 @@ However, it is imporant to note the MSPE results contradict the placebo tests re
 
 ```{r mspe-top-donors}
 #| code-fold: true
+
+# Looking at a specific MSPE critia
 scm_data_OECD_HIC_UMC %>%
   grab_significance() %>%
   filter(pre_mspe < 5 * min(pre_mspe[type == "Treated"])) %>%
@@ -651,7 +682,7 @@ Lastly, we shall look at the Balance Table. Ideally, a properly optimized synthe
 ```{r}
 #| code-fold: true
 
-# Create balance tables 
+# Create balance tables for each donor pool 
 balance_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>% # OECD_HIC_UMC 
   grab_balance_table()
 
@@ -669,7 +700,7 @@ balance_OECD_HIC$variable <- gsub("EN.ATM.CO2E.PC_", "", balance_OECD_HIC$variab
 balance_OECD$variable <- gsub("EN.ATM.CO2E.PC_", "", balance_OECD$variable) 
 
 
-# Kable tables 
+# Create pretty kable tables 
 
 balance_OECD %>% 
   kable(digits = 4, 
@@ -699,11 +730,12 @@ As we can see from the balance sheet results above, there is a strong balance be
 
 ![Lepissier and Mildenberger's final plot.](images/figure_4.png)
 
-We replicated the difference in pre-treatment CO2 emissions, and displayed the weighted and weighted means in reference to Figure 2 in Lépissier & Mildenberger. This figure shows that our synthetic control model closely matches the pre-treatment balance found in the original paper.
+We replicated the difference in pre-treatment CO2 emissions, and displayed the un-weighted and weighted means in reference to Figure 2 in Lépissier & Mildenberger. This figure shows that our synthetic control model closely matches the pre-treatment balance found in the original paper. In both cases, the weighted difference in means is indistinguishable from 0, showing a strong pre-treatment balance with the treated units.
 
 ```{r final-plot}
 #| code-fold: true
 
+# Creating a difference in means plot with the `scm_data_OECD_HIC_UMC` dataframe
 
 scm_data_OECD_HIC_UMC %>%
     # Extract values from balance table
@@ -744,11 +776,11 @@ scm_data_OECD_HIC_UMC %>%
 
 ## Conclusion
 
-We have produced a very near replication of the original Lépissier and Mildenberger study. We utilized an existing package `tidysynth` to create our synthetic control model. Initially, we had attempted to average the CO2 emissions per capita across the pre-treatment time window, by country. This, however, led to poor model fit, and thus would not serve as an accurate counter factual.
+We have produced a replication of the original Lépissier and Mildenberger study. We utilized an existing package `tidysynth` to create our synthetic control model. Initially, we had attempted to average the CO2 emissions per capita across the pre-treatment time window, by country. This, however, led to poor model fit, and thus would not serve as an accurate counter factual.
 
 To create a more accurate synthetic control, we amended our model, and generated synthetic outcomes based on yearly emissions by donor country for the most accurate resolution of emissions. This provided much more accurate results that closely followed the real emission levels within the UK. With our more confident synthetic model, we progressed to modeling the effect of the treatment.
 
-Utilizing all three donor pool sets, we modeled the gap, and found that within the study's target years of 1990-2005, our model produces a very accurate replication of the true per capita emissions with the UK. From there we then ran a series of placebo tests across the same data sets. The placebo tests is where we faced the most dissimilarities. We found a good pre-treatment fit but no evidence suggesting a significant post-treatment effect.
+Utilizing all three donor pool sets, we modeled the gap, and found that within the study's target years of 1990-2005, our model produces a very accurate replication of the true per capita emissions with the UK. From there, we then ran a series of placebo tests across the same data sets. The placebo tests is where we faced the most dissimilarities. We found a good pre-treatment fit but no evidence suggesting a significant post-treatment effect.
 
 From there, we plotted the MSPE ratios, which show the effect of the treatment in comparison to the pre-treatment error. While we saw differences in the resulting ratio between the different donor pools, we saw a strong ratio value with the pool used within the study. Specifically, the donor pool including OECD, HIC, and UMC countries. This high ratio, with the donor pool utilized in the study, gives us more confidence in stating that the change in carbon emissions we modeled is a causal outcome of the treatment. However, the placebo inconsistencies and highly inflated MSPE ratios is worth flagging.
 
