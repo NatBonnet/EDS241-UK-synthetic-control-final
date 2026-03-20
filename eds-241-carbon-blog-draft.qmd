@@ -24,9 +24,13 @@ All work on this project can be found on our [GitHub Repository](https://github.
 
 ## Lépissier & Mildenberger (2021)
 
+<<<<<<< HEAD
+This analysis aimed to reproduce the results from Lépissier, Alice & Mildenberger, Matto. (2021). The authors employed a synthetic control method (SCM) to estimate the causal effect of the UK’s 2001 Climate Change Programme (CCP) on the country’s carbon emissions. Their main finding demonstrates that CCP reduced the UK's carbon emissions. CO2 emissions per capita were 9.8% lower in 2005 relative to what they would have been if the CCP had not been passed, demonstrating that unilateral climate policies can still reduce carbon emissions even in the absence of a binding global climate agreement.
+=======
 This analysis aims to reproduce the results of Lépissier and Mildenberger's (2021) study, *Unilateral Climate Policies Can Substantially Reduce National Carbon Pollution*.
 
 The authors employed a synthetic control method (SCM) to estimate the causal effect of the UK’s 2001 Climate Change Programme (CCP) on the country’s carbon emissions. Their main finding demonstrates that CCP reduced the UK's carbon emissions. CO2 emissions per capita were 9.8% lower in 2005 relative to what they would have been if the CCP had not been passed, demonstrating that unilateral climate policies can still reduce carbon emissions even in the absence of a binding global climate agreement.
+>>>>>>> test
 
 ### The Fundamental Problem & the SMC Fix
 
@@ -34,7 +38,13 @@ The 2001 UK CCP is a complex reform that included a carbon tax on large-scale en
 
 We are interested in understanding what the UK's carbon emissions might have looked like had the CCP not been enacted. To do so we need to create a strong counter factual to simulate what *would* have happened. The authors take the synthetic control method (SCM) to manufacture a synthetic UK. This approach is less restrictive than a difference-in-difference strategy would be to compare other countries without a carbon policy.
 
+<<<<<<< HEAD
+To do so we need to create a strong counter factual to simulate what *would* have happened. The authors take the synthetic control method (SCM) to manufacture a synthetic UK. This approach is less restrictive than a difference-in-difference strategy would be to compare other countries without a carbon policy. A SCM method uses weighted elements of donor countries to create a more accurate synthetic counterfactual, where a DiD method must use the complete picture of existing similar data.
+
+The synthetic UK is the combination of weighted averages of counties that did not receive the policy intervention. To create the best-fit synthetic UK, donor country emissions are weighted to match UK pre-treatment emissions trends. Countries are given higher weights if they more closely match observed pre-treatment trends in the UK.
+=======
 The synthetic UK is the combination of weighted averages of counties that did not receive the policy intervention. To create the best fit synthetic UK, donor country emissions are weighted to match UK pre-treatment emissions trends.
+>>>>>>> test
 
 ### Assessing Treatment Effect
 
@@ -54,7 +64,11 @@ After the 2001 policy: The gap between Real UK and Synthetic UK = *Treatment eff
 
 -   Treatment year: 2001
 
+<<<<<<< HEAD
+-   Donor pool: 51 countries with...
+=======
 -   Donor pool: 51 countries that...
+>>>>>>> test
 
     -   \(1\) in OECD or classified by the World Bank as upper middle–income or high-income countries at the time of treatment in 2001
 
@@ -89,17 +103,17 @@ The Work Bank classifies countries into income categories according to GNI per c
 
 -   \(1\) SUTVA (stable unit treatment values assumption). There is no spillover of CCP enactment to other countries in the donor pool
 
--   \(2\) Variables used to form the weights must have values for donor pool countries that are similar to those of the UK. This minimizes interpolation bias if the procedure interpolates across regions with very different characteristics
+-   \(2\) Variables used to form the weights must have values for donor pool countries that are similar to those of the UK. This minimizes interpolation bias. Interpolation bias introduces error by assuming a smooth or linear relationship between data points. Our procedure interpolates across regions with very different characteristics, so we use more similar countries to reduce inaccurate assumptions.
 
 -   \(3\) Strong pretreatment fit between synthetic UK and actual UK. The only credible way to assess treatment effect is by comparing against a strong counter factual, which needs to behave essentially the same as the actual UK.
 
-### Approach to address assumptions
+### Study approach to address assumptions
 
--   \(1\) Authors selected the donor sample based on countries that had not passed any major climate legislation until the 2005 European Union's Emissions Trading Scheme (EU ETS). The UK was the only country with the CCP in 2001. This attempts to get the best possible causal effect calculation.
+-   \(1\) Authors selected the donor sample based on countries that had not passed any major climate legislation until the 2005 European Union's Emissions Trading Scheme (EU ETS). The UK was the only country with the CCP in 2001. This attempts to get the best possible causal effect calculation while minimizing spillover effects. By comparing countries without unilateral climate policies in place, we more accurately represent what *would* have happened given no policy.
 
--   \(2\) Using per capita emissions to avoid interpolation bias, meaning emissions data are on the same order of magnitude across pool
+-   \(2\) Using per capita emissions to avoid interpolation bias. Per capita data normalizes across country population size so we do not compare emissions on different magnitudes across donor pool countries.
 
--   \(3\) The authors rescale CO2 emissions per capita to a 1990 and 2000 baseline to normalize the pre-treatment window
+-   \(3\) The authors rescale CO2 emissions per capita to a 1990 and 2000 baseline to normalize the pre-treatment window. This was equivalent to 11 pre-treatment years.
 
 ## Replicating UK Synthetic Control
 
@@ -131,7 +145,14 @@ load_rdata_files()
 # Source  function to filter any donor countries without significant weight
 source(here("R", "plot_weights_filtered.R"))
 
+data_OECD <- data_OECD %>% 
+  filter(year >= 1990)
+  
+data_OECD_HIC <- data_OECD_HIC %>% 
+  filter(year >= 1990)
 
+<<<<<<< HEAD
+=======
 # Filter for post 1990 across all datasets
 data_OECD <- data_OECD %>% 
   filter(year >= 1990)
@@ -139,6 +160,7 @@ data_OECD <- data_OECD %>%
 data_OECD_HIC <- data_OECD_HIC %>% 
   filter(year >= 1990)
 
+>>>>>>> test
 data_OECD_HIC_UMC <- data_OECD_HIC_UMC %>% 
   filter(year >= 1990)
 ```
@@ -160,11 +182,11 @@ scm_data_OECD0 <- data_OECD %>%
     generate_placebos = TRUE) %>%
   
   generate_predictor(  # Predictors (pre-treatment averages)
-    time_window = 1990:2001,
+    time_window = 1990:2000,
     mean.preT = mean(mean.preT, na.rm = TRUE)) %>%
   
   generate_weights(
-    optimization_window = 1990:2001,
+    optimization_window = 1990:2000,
     margin_ipop = 0.02,
     sigf_ipop = 7,
     bound_ipop = 6) %>%
@@ -182,11 +204,11 @@ scm_data_OECD_HIC0 <- data_OECD_HIC %>%
     generate_placebos = TRUE) %>%
   
   generate_predictor(  # Predictors (pre-treatment averages)
-    time_window = 1990:2001,
+    time_window = 1990:2000,
     mean.preT = mean(mean.preT, na.rm = TRUE)) %>%
   
   generate_weights(
-    optimization_window = 1990:2001,
+    optimization_window = 1990:2000,
     margin_ipop = 0.02,
     sigf_ipop = 7,
     bound_ipop = 6) %>%
@@ -204,11 +226,11 @@ scm_data_OECD_HIC_UMC0 <- data_OECD_HIC %>%
     generate_placebos = TRUE) %>%
   
   generate_predictor(  # Predictors (pre-treatment averages)
-    time_window = 1990:2001,
+    time_window = 1990:2000,
     mean.preT = mean(mean.preT, na.rm = TRUE)) %>%
   
   generate_weights(
-    optimization_window = 1990:2001,
+    optimization_window = 1990:2000,
     margin_ipop = 0.02,
     sigf_ipop = 7,
     bound_ipop = 6) %>%
@@ -276,7 +298,8 @@ run_scm <- function(data) {
       time       = year,
       i_unit     = "United Kingdom",
       i_time     = 2001,
-      generate_placebos = TRUE)
+      generate_placebos = TRUE
+    )
   
   for (yr in pred_years) {
     var_name <- paste0("EN.ATM.CO2E.PC_", yr)
@@ -292,7 +315,9 @@ run_scm <- function(data) {
 scm_data_OECD        <- run_scm(data_OECD)
 scm_data_OECD_HIC    <- run_scm(data_OECD_HIC)
 scm_data_OECD_HIC_UMC <- run_scm(data_OECD_HIC_UMC)
+
 ```
+
 
 **Assessing pre-treatment fit**
 
@@ -393,9 +418,7 @@ p2_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
 p2_plot <- p2_data_OECD / p2_data_OECD_HIC/ p2_data_OECD_HIC_UMC
 p2_plot
 
-# Save the plot 
-#ggsave(filename = here::here("figs", "p2_plot_dif.png"), 
-       #plot = p2_plot)
+
 
 ```
 
@@ -468,6 +491,55 @@ p3_plot
 
 ```
 
+<<<<<<< HEAD
+```{r}
+#| out-width: "100%"
+#| fig.asp: 1
+
+p3_data_OECD <- scm_data_OECD %>%
+  plot_placebos(prune = FALSE) +
+  labs(title = "Placebo Tests",
+       subtitle = "OECD Countries",
+       y = "",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50", hjust = 0.5)) 
+
+
+# data_OECD_HIC
+p3_data_OECD_HIC <- scm_data_OECD_HIC %>%
+  plot_placebos(prune = FALSE) +
+  labs(title = "",
+       subtitle = "OECD and HIC Countries",
+       y = "CO2 per capita (power sector)",
+       x = "", 
+       caption = NULL)+
+  theme(legend.position = "none", 
+        plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(color = "grey50", hjust = 0.5))
+
+
+# data_OECD_HIC_UMC
+p3_data_OECD_HIC_UMC <- scm_data_OECD_HIC_UMC %>%
+  plot_placebos(prune = FALSE) +
+  labs(title = "",
+       subtitle = "OECD, HIC, and UMC Countries",
+       y = "",
+       x = "",
+       caption = "Treatment: UK Climate Change Programme (2001)") + 
+  theme(plot.subtitle = element_text(color = "grey50", hjust = 0.5))
+
+
+# Patchwork plots for each dataset on top of one another
+p3_plot <- p3_data_OECD / p3_data_OECD_HIC/ p3_data_OECD_HIC_UMC
+p3_plot
+
+```
+
+**Comparing Donor Weights** The authors of the original study report their top donor countries as 19% Poland, 19% Libya, 18% Bahamas, 16% Belgium, 6% Trinidad and Tobago, 5% Uruguay, 4% Luxembourg, and 1% Brunei. Additionally, following Based on our gap comparison and placebo tests, our best fit donor pool is the widest OECD, HIC, and UMC pool. Comparing the output from this donor pool's synthetic control, our results are very similar with all the same countries contained, and Libya and Poland representing our top 2 donor countries.
+=======
 **Discussion**
 
 Across all three donor pools, the UK's pre-treatment gap hovers near zero, indicating a strong synthetic control fit. However, several placebo units diverge widely from zero pre-treatment, reflecting poor fit for those control units.
@@ -477,6 +549,7 @@ Following treatment in 2001, the UK shows no meaningful divergence from its pre-
 #### Comparing Donor Weights
 
 The authors of the original study report their top donor countries as 19% Poland, 19% Libya, 18% Bahamas, 16% Belgium, 6% Trinidad and Tobago, 5% Uruguay, 4% Luxembourg, and 1% Brunei. They used weighted averages of the donor pool countries and an algorithm to best match the pre-treatment UK and synthetic UK trends. Additionally, following Based on our gap comparison, our best fit donor pool is the widest OECD, HIC, and UMC pool. Comparing the output from this donor pool's synthetic control, our results are very similar with all the same countries contained, and Libya and Poland representing our top 2 donor countries. This means that our SCM donor pools and the study's donor pools are closely equivalent and the synthetic UK in both cases act similar.
+>>>>>>> test
 
 ```{r  synth-weights-plots}
 #| code-fold: true
